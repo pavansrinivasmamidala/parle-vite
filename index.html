@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParleVite · TCF French Practice</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇫🇷</text></svg>" />
+</head>
+<body>
+  <!-- ===== Top bar ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-logo">🇫🇷</span>
+      <div class="brand-text">
+        <strong>ParleVite</strong>
+        <span class="brand-sub">TCF practice</span>
+      </div>
+    </div>
+
+    <div class="selectors">
+      <label class="sel">
+        <span>Level</span>
+        <select id="levelSelect" aria-label="CEFR level">
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="B1" selected>B1</option>
+          <option value="B2">B2</option>
+          <option value="C1">C1</option>
+          <option value="C2">C2</option>
+        </select>
+      </label>
+      <label class="sel">
+        <span>Difficulty</span>
+        <select id="difficultySelect" aria-label="Difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="stats">
+      <div class="pill" id="streakPill" title="Daily streak">🔥 <span id="streakVal">0</span></div>
+      <div class="pill" id="xpPill" title="Total XP">⭐ <span id="xpVal">0</span></div>
+      <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ===== Tab nav ===== -->
+  <nav class="tabs" id="tabs">
+    <button class="tab" data-tab="home">🏠 Home</button>
+    <button class="tab" data-tab="translate">🔤 Translate</button>
+    <button class="tab" data-tab="speak">🎙️ Speak</button>
+    <button class="tab" data-tab="build">🧩 Build</button>
+    <button class="tab" data-tab="grammar">✅ Grammar</button>
+    <button class="tab" data-tab="flashcards">🃏 Cards</button>
+    <button class="tab" data-tab="review">🎯 Review <span class="badge" id="reviewBadge" hidden>0</span></button>
+  </nav>
+
+  <!-- ===== Mode panels ===== -->
+  <main id="main">
+    <section class="panel" data-panel="home"></section>
+    <section class="panel" data-panel="translate"></section>
+    <section class="panel" data-panel="speak"></section>
+    <section class="panel" data-panel="build"></section>
+    <section class="panel" data-panel="grammar"></section>
+    <section class="panel" data-panel="flashcards"></section>
+    <section class="panel" data-panel="review"></section>
+  </main>
+
+  <!-- ===== Settings drawer ===== -->
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="drawer" id="drawer" hidden aria-label="Settings">
+    <div class="drawer-head">
+      <h2>Settings</h2>
+      <button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="field" id="syncField" hidden>
+        <label>Sync across devices</label>
+        <div id="syncSignedOut">
+          <input type="email" id="syncEmail" placeholder="you@email.com" autocomplete="email" />
+          <button class="btn small" id="syncSendLink" type="button" style="margin-top:8px">Send magic link</button>
+        </div>
+        <div id="syncSignedIn" hidden>
+          <div class="muted" id="syncWho"></div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn ghost small" id="syncNow" type="button">Sync now</button>
+            <button class="btn ghost small" id="syncOut" type="button">Sign out</button>
+          </div>
+        </div>
+        <div id="syncStatus" class="key-status"></div>
+        <p class="hint">Sign in with a passwordless email link to sync your XP, streak,
+          mistakes &amp; settings to your other devices.</p>
+      </div>
+
+      <div class="field">
+        <label for="apiKeyInput">Anthropic API key</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" />
+        <p class="hint">Stored only in this browser (localStorage). Used to call Claude Haiku for fresh
+          exercises &amp; personalized feedback. Without it, the app runs on its built-in starter bank.
+          <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get a key →</a>
+        </p>
+        <div id="keyStatus" class="key-status"></div>
+      </div>
+
+      <div class="field">
+        <label for="voiceSelect">Speaking voice (French)</label>
+        <select id="voiceSelect"></select>
+        <button class="btn ghost small" id="testVoiceBtn" type="button">🔊 Test voice</button>
+      </div>
+
+      <div class="field">
+        <label>Daily XP goal</label>
+        <input type="number" id="goalInput" min="10" max="500" step="10" />
+      </div>
+
+      <div class="field danger-zone">
+        <label>Data</label>
+        <button class="btn danger" id="resetBtn" type="button">Reset all progress</button>
+        <p class="hint">Clears XP, streak, mistakes &amp; cached exercises. Your API key stays.</p>
+      </div>
+
+      <p class="version">ParleVite · runs fully in your browser · Claude Haiku 4.5</p>
+    </div>
+  </aside>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- Plain (non-module) scripts so the app runs straight from file:// -->
+  <script src="js/store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/srs.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ai.js"></script>
+  <!-- Supabase (optional cross-device sync). Loads from CDN; app works without it. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
